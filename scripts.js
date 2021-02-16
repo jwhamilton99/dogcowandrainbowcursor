@@ -328,6 +328,9 @@ class Game {
 	}
 	
 	resetGame() {
+		this.points = [];
+		this.platforms = [];
+		this.enemies = [];
 		this.tick = 0;
 		this.player.score = 0;
 		this.player.health = 4;
@@ -383,7 +386,7 @@ class Game {
 		this.points.push(highPoint);
 		
 		if(length > 10) {
-			if(true) {
+			if(Math.floor(Math.random()*3) == 1) {
 				var hPlatform = new Platform(Math.floor(Math.random()*(length*0.75)+(Math.floor(length*0.25))),2,this.platforms.length);
 				hPlatform.xOffset = -(Math.floor(Math.random()*5)+2)*hPlatform.panelWidth;
 				this.platforms.push(hPlatform);
@@ -628,16 +631,28 @@ class Game {
 	}
 }
 
+var resizeLock = false;
+
 window.onresize = function() {
 	resizeCanvas();
+	if(window.innerWidth < 500) {
+		if(!resizeLock) {
+			window.alert("this game does not work on mobile or on small screens. please only use a desktop. sorry about that");
+			resizeLock = true;
+		}
+	} else {
+		if(resizeLock) {
+			resizeLock = false;
+		}
+	}
 }
 
 window.onload = function() {
 	initGame();
 	resizeCanvas();
 	start();
-	
 	if(window.innerWidth < 500) {
 		window.alert("this game does not work on mobile or on small screens. please only use a desktop. sorry about that");
+		resizeLock = true;
 	}
 }
