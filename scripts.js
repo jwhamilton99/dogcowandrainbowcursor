@@ -238,7 +238,9 @@ class Player {
 		if(this.health == 0) {
 			waitToRestart = true;
 			gameState = 2;
-			setTimeout(1000)
+			setTimeout(function(){
+				waitToRestart = false;
+			},1000);
 		} else {
 			this.flashHurt(8);
 		}
