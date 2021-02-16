@@ -1,0 +1,37 @@
+.background-panel {
+	display:inline;
+}
+
+#container {
+	user-select: none;
+	display: flex;
+	align-content: center;
+	justify-content: center;
+	height:100%;
+	background-image: url("images/desktop.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#background {
+	margin-top:100px;
+}
+
+#screenContainer {
+	display:inline;
+}
+
+#screen {
+	position:absolute;
+	z-index:0;
+}
+
+#bottom {
+	position:absolute;
+}
+
+#screenCanvas {
+	position:absolute;
+	z-index:100;
+}
