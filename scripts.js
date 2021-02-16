@@ -220,6 +220,15 @@ class Player {
 	}
 	
 	increaseScore(points) {
+		for(var i = 1; i <= points; i++) {
+			if((this.score+i)%100 == 0) {
+				this.health++;
+				if(this.health > 4) {
+					this.health = 4;
+				}
+				break;
+			}
+		}
 		this.score+=points;
 	}
 	
@@ -569,9 +578,6 @@ class Game {
 		
 		if(this.tick%50 == 0) {
 			this.player.increaseScore(1);
-			if(this.player.score%100 == 0) {
-				this.player.health++;
-			}
 		}
 		
 		if(!this.resetting) {
