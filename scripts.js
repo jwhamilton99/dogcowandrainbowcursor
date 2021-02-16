@@ -13,6 +13,7 @@ var tutorialImage;
 
 //0=start menu, 1=playing, 2=gameover, 3=tutorial
 var gameState = 0;
+var waitToRestart = false;
 
 var game;
 
@@ -235,7 +236,9 @@ class Player {
 	decreaseHealth() {
 		this.health--;
 		if(this.health == 0) {
+			waitToRestart = true;
 			gameState = 2;
+			setTimeout(1000)
 		} else {
 			this.flashHurt(8);
 		}
@@ -328,7 +331,9 @@ class Game {
 						gameState = 3;
 						break;
 					case 2:
-						this.resetGame();
+						if(!waitToRestart) {
+							this.resetGame();
+						}
 						break;
 					case 3:
 						this.resetGame();
