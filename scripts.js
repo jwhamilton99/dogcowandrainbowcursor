@@ -9,8 +9,9 @@ var livesImage;
 var bulletImage;
 var titleImage;
 var gameOverImage;
+var tutorialImage;
 
-//0=start menu, 1=playing, 2=gameover
+//0=start menu, 1=playing, 2=gameover, 3=tutorial
 var gameState = 0;
 
 var game;
@@ -60,6 +61,10 @@ function initGame() {
 	//bullet
 	bulletImage = new Image();
 	bulletImage.src = "images/bullet.png";
+	
+	//tutorial
+	tutorialImage = new Image();
+	tutorialImage.src = "images/tutorial.png";
 }
 
 function start() {
@@ -309,10 +314,14 @@ class Game {
 			if(e.code == "Space") {
 				switch(gameState) {
 					case 0:
-						this.resetGame()
+						this.tick = 0;
+						gameState = 3;
 						break;
 					case 2:
-						this.resetGame()
+						this.resetGame();
+						break;
+					case 3:
+						this.resetGame();
 						break;
 					default:
 						this.player.jump();
@@ -368,11 +377,29 @@ class Game {
 			case 2:
 				this.drawGameOver();
 				break;
+			case 3:
+				this.drawTutorial();
+				break;
 			default:
 				this.incrementGame()
 				this.drawGame();
 		}
 		setTimeout(function() {me.refresh();},this.speed);
+	}
+	
+	drawTutorial() {
+		var c = screenCanvas.getContext("2d");
+		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
+		
+		c.drawImage(tutorialImage, 0,0,this.screenCanvas.width, this.screenCanvas.height);
+		
+		if(this.tick%200 < 100) {
+			c.font = "30px Arial";
+			c.fillStyle = "red";
+			c.textAlign = "right";
+			c.fillText("Press Space To Continue", this.screenCanvas.width-20, this.screenCanvas.height-20);
+		}
+		this.tick++;
 	}
 	
 	generateEnemy() {
@@ -593,6 +620,14 @@ class Game {
 		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
 		
 		c.drawImage(titleImage, 0,0,this.screenCanvas.width, this.screenCanvas.height);
+		
+		if(this.tick%200 < 100) {
+			c.font = "30px Arial";
+			c.fillStyle = "red";
+			c.textAlign = "center";
+			c.fillText("Press Space To Start", this.screenCanvas.width*0.5-50, this.screenCanvas.height-20);
+		}
+		this.tick++;
 	}
 	
 	drawGameOver() {
@@ -605,6 +640,7 @@ class Game {
 	drawGame() {
 		var c = screenCanvas.getContext("2d");
 		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
+		c.fillStyle = "black";
 		
 		//draw player
 		if(this.player.visible) {
