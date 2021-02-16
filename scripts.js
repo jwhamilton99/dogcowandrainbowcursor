@@ -291,10 +291,11 @@ class Enemy {
 		this.image = enemyImage;
 		this.dim = 50;
 		this.index = index;
+		this.speed = 4;
 	}
 	
 	increment() {
-		this.xOffset+=4;
+		this.xOffset+=this.speed;
 		if(this.cycleIndex%3 == 0) {
 			this.frameIndex = ((this.frameIndex+=1)%9);
 		}
@@ -369,6 +370,7 @@ class Game {
 		
 		this.tick = 0;
 		this.speed = 10;
+		this.enemySpeedOffset = 0;
 		this.pointsRate = 16;
 		this.enemiesRate = 4;
 		this.player.score = 0;
@@ -413,9 +415,13 @@ class Game {
 	
 	generateEnemy() {
 		if(this.platforms.length != 0) {
-			this.enemies.push(new Enemy(this.enemies.length, (Math.floor(Math.random()*2))));
+			var e = new Enemy(this.enemies.length, (Math.floor(Math.random()*2)));
+			e.speed+=this.enemySpeedOffset;
+			this.enemies.push(e);
 		} else {
-			this.enemies.push(new Enemy(this.enemies.length, 0));
+			var e = new Enemy(this.enemies.length, 0)
+			e.speed+=this.enemySpeedOffset;
+			this.enemies.push(e);
 		}
 	}
 	
@@ -545,6 +551,7 @@ class Game {
 		this.tick++;
 		
 		if(this.tick%10000 == 0) {
+			this.enemySpeedOffset++;
 			this.speed--;
 			if(this.speed < 1) {
 				this.speed = 1;
@@ -557,7 +564,7 @@ class Game {
 			if(this.pointsRate > 20) {
 				this.pointsRate = 20;
 			}
-			this.player.sidekick.cooldown++;
+			this.player.sidekick.cooldown-=0.2;
 		}
 		
 		if(this.tick%500 == 0) {
