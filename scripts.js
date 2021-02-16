@@ -382,6 +382,9 @@ class Game {
 		this.enemiesRate = 4;
 		this.player.score = 0;
 		this.player.health = 4;
+		this.player.yOffset = 0;
+		this.player.currentGroundLevel = 0;
+		this.player.yForce = 0;
 		this.resetting = false;
 		gameState = 1;
 	}
