@@ -303,6 +303,7 @@ class Game {
 		this.speed = 10;
 		this.pointsRate = 16;
 		this.enemiesRate = 4;
+		this.resetting = false;
 		
 		document.addEventListener('keydown', (e)=> {
 			if(e.code == "Space") {
@@ -328,12 +329,33 @@ class Game {
 	}
 	
 	resetGame() {
-		this.points = [];
-		this.platforms = [];
-		this.enemies = [];
+		this.resetting = true;
+		for(var i = 0; i <= this.enemies.length; i++) {
+			this.enemies.pop();
+		}
+		
+		for(var i = 0; i <= this.points.length; i++) {
+			this.points.pop();
+		}
+		
+		for(var i = 0; i <= this.platforms.length; i++) {
+			this.platforms.pop();
+		}
+		
+		for(var i = 0; i <= this.player.sidekick.bullets.length; i++) {
+			this.player.sidekick.bullets.pop();
+		}
+		
+		this.player.sidekick.coolingDown = false;
+		this.player.sidekick.cooldown = 1;
+		
 		this.tick = 0;
+		this.speed = 10;
+		this.pointsRate = 16;
+		this.enemiesRate = 4;
 		this.player.score = 0;
 		this.player.health = 4;
+		this.resetting = false;
 		gameState = 1;
 	}
 	
@@ -525,27 +547,29 @@ class Game {
 			}
 		}
 		
-		for(var e = 0; e < this.enemies.length; e++) {
-			this.enemies[e].increment();
-			if(!this.checkCollision(this.player, this.enemies[e]) && !this.checkBulletCollision(this.player.sidekick.bullets, this.enemies[e])) {
-				if(this.screenCanvas.width-(this.enemies[e].xOffset-this.enemies[e].dim) < 0) {
-					this.removeEnemy(e);
+		if(!this.resetting) {
+			for(var e = 0; e < this.enemies.length; e++) {
+				this.enemies[e].increment();
+				if(!this.checkCollision(this.player, this.enemies[e]) && !this.checkBulletCollision(this.player.sidekick.bullets, this.enemies[e])) {
+					if(this.screenCanvas.width-(this.enemies[e].xOffset-this.enemies[e].dim) < 0) {
+						this.removeEnemy(e);
+					}
 				}
 			}
-		}
-		
-		for(var p = 0; p < this.platforms.length; p++) {
-			this.platforms[p].iterate();
-			if(this.screenCanvas.width-this.platforms[p].xOffset+(this.platforms[p].panelWidth*this.platforms[p].numPanels) < 0) {
-				this.removePlatform(this.platforms[p].index);
+			
+			for(var p = 0; p < this.platforms.length; p++) {
+				this.platforms[p].iterate();
+				if(this.screenCanvas.width-this.platforms[p].xOffset+(this.platforms[p].panelWidth*this.platforms[p].numPanels) < 0) {
+					this.removePlatform(this.platforms[p].index);
+				}
 			}
-		}
-		
-		for(var p = 0; p < this.points.length; p++) {
-			this.points[p].increment();
-			if(!this.checkPointCollision(this.player , this.points[p])) {
-				if(this.screenCanvas.width-(this.points[p].xOffset-this.points[p].dim) < 0) {
-					this.removePoint(p);
+			
+			for(var p = 0; p < this.points.length; p++) {
+				this.points[p].increment();
+				if(!this.checkPointCollision(this.player , this.points[p])) {
+					if(this.screenCanvas.width-(this.points[p].xOffset-this.points[p].dim) < 0) {
+						this.removePoint(p);
+					}
 				}
 			}
 		}
@@ -553,10 +577,12 @@ class Game {
 		this.ground.increment();
 		this.player.processY(this.platforms, this.screenCanvas.width);
 		this.player.sidekick.increment();
-		for(var b = 0; b < this.player.sidekick.bullets.length; b++) {
-			this.player.sidekick.bullets[b].increment();
-			if(this.player.sidekick.bullets[b].xOffset > this.screenCanvas.width || this.screenCanvas.height-this.groundOffset-this.player.sidekick.bullets[b].yOffset > this.screenCanvas.height) {
-				this.removeBullet(this.player.sidekick.bullets[b].index);
+		if(!this.resetting) {
+			for(var b = 0; b < this.player.sidekick.bullets.length; b++) {
+				this.player.sidekick.bullets[b].increment();
+				if(this.player.sidekick.bullets[b].xOffset > this.screenCanvas.width || this.screenCanvas.height-this.groundOffset-this.player.sidekick.bullets[b].yOffset > this.screenCanvas.height) {
+					this.removeBullet(this.player.sidekick.bullets[b].index);
+				}
 			}
 		}
 		this.player.increment();
