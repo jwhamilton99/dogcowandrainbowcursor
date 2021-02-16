@@ -562,6 +562,9 @@ class Game {
 		
 		if(this.tick%10000 == 0) {
 			this.enemySpeedOffset++;
+			if(this.enemySpeedOffset > 10) {
+				this.enemySpeedOffset = 10;
+			}
 			this.speed--;
 			if(this.speed < 1) {
 				this.speed = 1;
@@ -575,6 +578,9 @@ class Game {
 				this.pointsRate = 20;
 			}
 			this.player.sidekick.cooldown-=0.2;
+			if(this.player.sidekick.cooldown < 0.2) {
+				this.player.sidekick.cooldown = 0.2;
+			}
 		}
 		
 		if(this.tick%500 == 0) {
