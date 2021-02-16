@@ -641,6 +641,11 @@ class Game {
 		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
 		
 		c.drawImage(gameOverImage, 0,0,this.screenCanvas.width, this.screenCanvas.height);
+		
+		c.font = "20px Arial";
+		c.fillStyle = "black";
+		c.textAlign = "right";
+		c.fillText("Your Score: "+this.player.score, this.screenCanvas.width-10, 30);
 	}
 	
 	drawGame() {
