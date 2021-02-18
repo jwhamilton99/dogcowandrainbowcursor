@@ -143,7 +143,7 @@ class Sidekick {
 	
 	shoot(jumpOffset) {
 		if(!this.coolingDown) {
-			this.bullets.push(new Bullet(this.baseX+this.xOffset, this.baseY+this.yOffset+jumpOffset));
+			this.bullets.push(new Bullet(this.baseX+this.xOffset, this.baseY+this.yOffset+jumpOffset+this.sinOffset));
 			var me = this;
 			this.coolingDown = true;
 			setTimeout(function(){me.coolingDown = false}, 1000*this.cooldown);
@@ -517,8 +517,8 @@ class Game {
 	
 	checkBulletCollision(bullets, enemy) {
 		for(var b = 0; b < bullets.length; b++) {
-			if(bullets[b].xOffset > this.screenCanvas.width-enemy.xOffset) {
-				if(bullets[b].yOffset < enemy.yOffset+enemy.dim && bullets[b].yOffset > enemy.yOffset) {
+			if(bullets[b].xOffset+bullets[b].dim > this.screenCanvas.width-enemy.xOffset && bullets[b].xOffset < this.screenCanvas.width-enemy.xOffset+enemy.dim) {
+				if(bullets[b].yOffset-bullets[b].dim < enemy.yOffset+enemy.dim && bullets[b].yOffset > enemy.yOffset) {
 					this.removeEnemy(enemy.index);
 					this.removeBullet(bullets[b].index);
 					this.player.increaseScore(5);
