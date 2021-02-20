@@ -11,6 +11,23 @@ var titleImage;
 var gameOverImage;
 var tutorialImage;
 
+var beginSound;
+var shootSound;
+var hitSound;
+var pointSound;
+var hurtSound;
+var gameoverSound;
+var musicIntroSound;
+var musicLoopSound;
+
+var muteImage;
+var soundImage;
+var musicImage;
+
+var musicPlaying = true;
+var soundsPlaying = true;
+var soundMode = 0;
+
 //0=start menu, 1=playing, 2=gameover, 3=tutorial
 var gameState = 0;
 var waitToRestart = false;
@@ -66,6 +83,27 @@ function initGame() {
 	//tutorial
 	tutorialImage = new Image();
 	tutorialImage.src = "images/tutorial.png";
+	
+	//sound
+	muteImage = new Image();
+	muteImage.src = "images/soundicons/mute.png";
+	soundImage = new Image();
+	soundImage.src = "images/soundicons/sound.png";
+	musicImage = new Image();
+	musicImage.src = "images/soundicons/music.png";
+	
+	//sounds
+	beginSound = new Audio("sounds/begin.mp3");
+	shootSound = new Audio("sounds/shoot.mp3");
+	hitSound = new Audio("sounds/hit.mp3");
+	pointSound = new Audio("sounds/point.mp3");
+	hurtSound = new Audio("sounds/hurt.mp3");
+	gameoverSound = new Audio("sounds/gameover.mp3");
+	musicIntroSound = new Audio("sounds/musicintro.mp3");
+	musicLoopSound = new Audio("sounds/musicloop.mp3");
+	musicLoopSound.onended = function() {
+		musicLoopSound.play();
+	}
 }
 
 function start() {
@@ -146,6 +184,9 @@ class Sidekick {
 			this.bullets.push(new Bullet(this.baseX+this.xOffset, this.baseY+this.yOffset+jumpOffset+this.sinOffset));
 			var me = this;
 			this.coolingDown = true;
+			if(soundsPlaying) {
+				shootSound.play();
+			}
 			setTimeout(function(){me.coolingDown = false}, 1000*this.cooldown);
 		}
 	}
@@ -237,11 +278,18 @@ class Player {
 		this.health--;
 		if(this.health == 0) {
 			waitToRestart = true;
+			if(soundsPlaying) {
+				musicLoopSound.pause();
+				gameoverSound.play();
+			}
 			gameState = 2;
 			setTimeout(function(){
 				waitToRestart = false;
 			},1000);
 		} else {
+			if(soundsPlaying) {
+				hurtSound.play();
+			}
 			this.flashHurt(8);
 		}
 	}
@@ -348,6 +396,28 @@ class Game {
 				if(gameState == 1) {
 					this.player.sidekick.shoot(this.player.yOffset);
 				}
+			} else if(e.code == "KeyM") {
+				console.log(soundMode);
+				soundMode = (soundMode+=1)%3;
+				console.log(soundMode);
+				switch(soundMode) {
+					case 0:
+						soundsPlaying = true;
+						musicPlaying = true;
+						musicLoopSound.currentTime = 0.0;
+						musicLoopSound.play();
+						break;
+					case 1:
+						soundsPlaying = true;
+						musicPlaying = false;
+						musicLoopSound.pause()
+						break;
+					default:
+						soundsPlaying = false;
+						musicPlaying = false;
+						musicLoopSound.pause()
+						break;
+				}
 			}
 		});
 		
@@ -386,6 +456,18 @@ class Game {
 		this.player.currentGroundLevel = 0;
 		this.player.yForce = 0;
 		this.resetting = false;
+		if(soundsPlaying) {
+			beginSound.play();
+		}
+		if(musicPlaying) {
+			musicIntroSound.play();
+			musicIntroSound.onended = function() {
+				if(musicPlaying) {
+					musicLoopSound.currentTime = 0.0;
+					musicLoopSound.play();
+				}
+			}
+		}
 		gameState = 1;
 	}
 	
@@ -509,6 +591,9 @@ class Game {
 			if((point.yOffset < player.yOffset && point.yOffset > player.yOffset-player.height) || (point.yOffset-point.dim < player.yOffset && point.yOffset-point.dim > player.yOffset-player.height)) {
 				this.removePoint(point.index);
 				player.increaseScore(10);
+				if(soundsPlaying) {
+					pointSound.play();
+				}
 				return true;
 			}
 		}
@@ -522,6 +607,9 @@ class Game {
 					this.removeEnemy(enemy.index);
 					this.removeBullet(bullets[b].index);
 					this.player.increaseScore(5);
+					if(soundsPlaying) {
+						hitSound.play();
+					}
 					return true;
 				}
 			}
@@ -720,10 +808,27 @@ class Game {
 		for(var l = 0; l <= this.player.health; l++) {
 			c.drawImage(livesImage, this.screenCanvas.width-livesWidth*l,2,livesWidth,livesWidth);
 		}
+		
+		//draw score
 		c.font = "20px Arial";
 		c.textAlign = "right";
 		c.fillText("Score: "+this.player.score, this.screenCanvas.width-5, 55);
 		
+		//draw sound mode
+		var x = 5;
+		var y = 5;
+		var dim = 25;
+		switch(soundMode) {
+			case 0:
+				c.drawImage(musicImage, x, y, dim, dim);
+				break;
+			case 1:
+				c.drawImage(soundImage, x, y, dim, dim);
+				break;
+			default:
+				c.drawImage(muteImage, x, y, dim, dim);
+				break;
+		}
 	}
 }
 
