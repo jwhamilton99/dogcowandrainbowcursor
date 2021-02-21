@@ -561,13 +561,13 @@ class Game {
 				hPlatform.incrementAmount+=this.speed;
 				this.platforms.push(hPlatform);
 				
-				// if(Math.floor(Math.random()*5)<=2) {
+				if(Math.floor(Math.random()*5)<=2) {
 					var higherPoint = new Point(this.points.length);
 					higherPoint.yOffset = 125*2;
 					higherPoint.xOffset = hPlatform.xOffset-(((hPlatform.numPanels*hPlatform.panelWidth)-higherPoint.dim)/2);
 					higherPoint.incrementAmount+=this.speed;
 					this.points.push(higherPoint);
-				// }
+				}
 			}
 		}
 	}
