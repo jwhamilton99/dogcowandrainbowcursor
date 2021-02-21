@@ -130,6 +130,7 @@ class Ground {
 		this.offset = 0;
 		this.image = platformMiddle;
 		this.incrementAmount = 1;
+		this.baseIncrementAmount = 1;
 	}
 	
 	increment() {
@@ -330,6 +331,7 @@ class Platform {
 		this.panelWidth = 20;
 		this.index = index;
 		this.incrementAmount = 1;
+		this.baseIncrementAmount = 1;
 	}
 	
 	iterate() {
@@ -345,6 +347,7 @@ class Point {
 		this.dim = 50;
 		this.index = index;
 		this.incrementAmount = 1;
+		this.baseIncrementAmount = 1;
 	}
 	
 	increment() {
@@ -362,6 +365,7 @@ class Enemy {
 		this.image = enemyImage;
 		this.dim = 50;
 		this.index = index;
+		this.baseSpeed = 4;
 		this.speed = 4;
 	}
 	
@@ -446,18 +450,22 @@ class Game {
 		for(var i = 0; i <= this.enemies.length; i++) {
 			this.enemies.pop();
 		}
+		this.enemies = [];
 		
 		for(var i = 0; i <= this.points.length; i++) {
 			this.points.pop();
 		}
+		this.points = [];
 		
 		for(var i = 0; i <= this.platforms.length; i++) {
 			this.platforms.pop();
 		}
+		this.platforms = [];
 		
 		for(var i = 0; i <= this.player.sidekick.bullets.length; i++) {
 			this.player.sidekick.bullets.pop();
 		}
+		this.player.sidekick.bullets = [];
 		
 		this.player.sidekick.coolingDown = false;
 		this.player.sidekick.cooldown = 1;
@@ -664,6 +672,18 @@ class Game {
 			this.pointsRate = Math.min(this.pointsRate+=1, 20);
 			
 			this.player.sidekick.cooldown = Math.max(this.player.sidekick.cooldown-0.2, 0.2);
+			
+			for(var i = 0; i < this.enemies.length; i++) {
+				this.enemies[i].speed = this.enemies[i].baseSpeed+this.speed;
+			}
+			
+			for(var i = 0; i < this.points.length; i++) {
+				this.points[i].incrementAmount = this.points[i].baseIncrementAmount+this.speed;
+			}
+			
+			for(var i = 0; i < this.platforms.length; i++) {
+				this.platforms[i].incrementAmount = this.platforms[i].baseIncrementAmount+this.speed;
+			}
 		}
 		
 		if(this.tick%Math.round(500/rateOffset) == 0) {
@@ -829,6 +849,8 @@ class Game {
 				c.drawImage(muteImage, x, y, dim, dim);
 				break;
 		}
+		
+		c.fillText(this.tick, this.screenCanvas.width-5, 80);
 	}
 }
 
