@@ -849,8 +849,6 @@ class Game {
 				c.drawImage(muteImage, x, y, dim, dim);
 				break;
 		}
-		
-		c.fillText(this.tick, this.screenCanvas.width-5, 80);
 	}
 }
 
