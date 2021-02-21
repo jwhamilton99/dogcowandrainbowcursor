@@ -19,10 +19,13 @@ var hurtSound;
 var gameoverSound;
 var musicIntroSound;
 var musicLoopSound;
+var livesIncreaseSound;
 
 var muteImage;
 var soundImage;
 var musicImage;
+
+var masterOffset = 500;
 
 var musicPlaying = true;
 var soundsPlaying = true;
@@ -99,6 +102,7 @@ function initGame() {
 	pointSound = new Audio("sounds/point.mp3");
 	hurtSound = new Audio("sounds/hurt.mp3");
 	gameoverSound = new Audio("sounds/gameover.mp3");
+	livesIncreaseSound = new Audio("sounds/livesincrease.mp3");
 	musicIntroSound = new Audio("sounds/musicintro.mp3");
 	musicLoopSound = new Audio("sounds/musicloop.mp3");
 	musicLoopSound.onended = function() {
@@ -125,10 +129,11 @@ class Ground {
 		this.numPanels = Math.ceil(width/this.panelWidth)+1;
 		this.offset = 0;
 		this.image = platformMiddle;
+		this.incrementAmount = 1;
 	}
 	
 	increment() {
-		this.offset = (this.offset+=2)%this.panelWidth;
+		this.offset = (this.offset+=this.incrementAmount)%this.panelWidth;
 	}
 }
 
@@ -181,7 +186,7 @@ class Sidekick {
 	
 	shoot(jumpOffset) {
 		if(!this.coolingDown) {
-			this.bullets.push(new Bullet(this.baseX+this.xOffset, this.baseY+this.yOffset+jumpOffset+this.sinOffset));
+			this.bullets.push(new Bullet(this.baseX+this.xOffset, this.baseY+this.yOffset+jumpOffset+this.sinOffset, this.bullets.length));
 			var me = this;
 			this.coolingDown = true;
 			if(soundsPlaying) {
@@ -208,6 +213,8 @@ class Player {
 		this.height = this.width*0.78;
 		this.currentGroundLevel = 0;
 		this.visible = true
+		this.rotation = 0;
+		this.rotationLimit = 15;
 		
 		this.sidekick = new Sidekick(this.screenXOffset, this.yOffset);
 	}
@@ -216,12 +223,16 @@ class Player {
 		var jumpForce = 12;
 		if(this.yOffset <= this.currentGroundLevel) {
 			this.yForce = jumpForce;
+			this.rotation = this.rotationLimit;
 		}
 	}
 	
 	processY(platforms, width) {
 		this.yOffset+=this.yForce;
 		this.yForce-=this.gravity;
+		if(this.yForce < 0) {
+			this.rotation = Math.min(Math.max(this.rotation-=1,-this.rotationLimit),this.rotationLimit);
+		}
 		
 		this.currentlyUnderPlatform = false
 		this.currentGroundLevel = 0;
@@ -243,6 +254,7 @@ class Player {
 		
 		if(this.yOffset <= this.currentGroundLevel) {
 			this.yForce = 0;
+			this.rotation = 0;
 			this.yOffset = this.currentGroundLevel;
 		}
 	}
@@ -265,8 +277,10 @@ class Player {
 		for(var i = 1; i <= points; i++) {
 			if((this.score+i)%100 == 0) {
 				this.health++;
-				if(this.health > 4) {
-					this.health = 4;
+				if(this.health > 5) {
+					this.health = 5;
+				} else {
+					livesIncreaseSound.play();
 				}
 				break;
 			}
@@ -313,10 +327,11 @@ class Platform {
 		this.endImage = platformEnd;
 		this.panelWidth = 20;
 		this.index = index;
+		this.incrementAmount = 1;
 	}
 	
 	iterate() {
-		this.xOffset+=2;
+		this.xOffset+=this.incrementAmount;
 	}
 }
 
@@ -327,10 +342,11 @@ class Point {
 		this.image = pointImage;
 		this.dim = 50;
 		this.index = index;
+		this.incrementAmount = 1;
 	}
 	
 	increment() {
-		this.xOffset+=2;
+		this.xOffset+=this.incrementAmount;
 	}
 }
 
@@ -368,10 +384,11 @@ class Game {
 		this.enemies = [];
 		this.platforms = [];
 		this.points = [];
-		this.speed = 10;
+		this.speed = 1;
 		this.pointsRate = 16;
 		this.enemiesRate = 4;
 		this.resetting = false;
+		this.refreshConstant = 10;
 		
 		document.addEventListener('keydown', (e)=> {
 			if(e.code == "Space") {
@@ -397,9 +414,7 @@ class Game {
 					this.player.sidekick.shoot(this.player.yOffset);
 				}
 			} else if(e.code == "KeyM") {
-				console.log(soundMode);
 				soundMode = (soundMode+=1)%3;
-				console.log(soundMode);
 				switch(soundMode) {
 					case 0:
 						soundsPlaying = true;
@@ -446,7 +461,7 @@ class Game {
 		this.player.sidekick.cooldown = 1;
 		
 		this.tick = 0;
-		this.speed = 10;
+		this.speed = 1;
 		this.enemySpeedOffset = 0;
 		this.pointsRate = 16;
 		this.enemiesRate = 4;
@@ -487,7 +502,7 @@ class Game {
 				this.incrementGame()
 				this.drawGame();
 		}
-		setTimeout(function() {me.refresh();},this.speed);
+		setTimeout(function() {me.refresh();},this.refreshConstant);
 	}
 	
 	drawTutorial() {
@@ -506,51 +521,49 @@ class Game {
 	}
 	
 	generateEnemy() {
+		var e = new Enemy(this.enemies.length, 0)
 		if(this.platforms.length != 0) {
 			var e = new Enemy(this.enemies.length, (Math.floor(Math.random()*2)));
-			e.speed+=this.enemySpeedOffset;
-			this.enemies.push(e);
-		} else {
-			var e = new Enemy(this.enemies.length, 0)
-			e.speed+=this.enemySpeedOffset;
-			this.enemies.push(e);
 		}
+		e.xOffset = -(Math.floor(Math.random()*masterOffset));
+		e.speed+=this.speed;
+		this.enemies.push(e);
 	}
 	
 	removePlatform(index) {
 		for(var e2 = index; e2 < this.platforms.length-1; e2++) {
 			this.platforms[e2] = this.platforms[e2+1];
+			this.platforms[e2].index--;
 		}
 		
 		this.platforms.pop();
-		
-		if(this.platforms.length != 0) {
-			for(var e2 = index; e2 < this.platforms.length; e2++) {
-				this.platforms[e2].index--;
-			}
-		}
 	}
 	
 	generatePlatform() {
 		var length = Math.floor(Math.random()*20)+5
 		var newPlatform = new Platform(length, 1, this.platforms.length)
+		newPlatform.xOffset = -(Math.floor(Math.random()*masterOffset));
+		newPlatform.incrementAmount+=this.speed;
 		this.platforms.push(newPlatform);
 		
 		var highPoint = new Point(this.points.length);
 		highPoint.yOffset = 125;
 		highPoint.xOffset = -(Math.floor(Math.random()*(newPlatform.numPanels*newPlatform.panelWidth)))+newPlatform.xOffset;
+		highPoint.incrementAmount+=this.speed;
 		this.points.push(highPoint);
 		
 		if(length > 10) {
 			if(Math.floor(Math.random()*3) == 1) {
 				var hPlatform = new Platform(Math.floor(Math.random()*(length*0.75)+(Math.floor(length*0.25))),2,this.platforms.length);
 				hPlatform.xOffset = -(Math.floor(Math.random()*5)+2)*hPlatform.panelWidth;
+				hPlatform.incrementAmount+=this.speed;
 				this.platforms.push(hPlatform);
 				
 				if(Math.floor(Math.random()*5)<=2) {
 					var higherPoint = new Point(this.points.length);
 					higherPoint.yOffset = 125*2;
 					higherPoint.xOffset = -(hPlatform.xOffset+(hPlatform.numPanels*hPlatform.panelWidth))/2;
+					higherPoint.incrementAmount+=this.speed;
 					this.points.push(higherPoint);
 				}
 			}
@@ -569,21 +582,19 @@ class Game {
 	}
 	
 	generatePoint() {
-		this.points.push(new Point(this.points.length));
+		var newPoint = new Point(this.points.length);
+		newPoint.xOffset = -(Math.floor(Math.random()*masterOffset));
+		newPoint.incrementAmount+=this.speed;
+		this.points.push(newPoint);
 	}
 	
 	removePoint(index) {
 		for(var e2 = index; e2 < this.points.length-1; e2++) {
 			this.points[e2] = this.points[e2+1];
+			this.points[e2].index--;
 		}
 		
 		this.points.pop();
-		
-		if(this.points.length != 0) {
-			for(var e2 = index; e2 < this.points.length; e2++) {
-				this.points[e2].index--;
-			}
-		}
 	}
 	
 	checkPointCollision(player, point) {
@@ -620,69 +631,46 @@ class Game {
 	removeBullet(index) {
 		for(var e2 = index; e2 < this.player.sidekick.bullets.length-1; e2++) {
 			this.player.sidekick.bullets[e2] = this.player.sidekick.bullets[e2+1];
+			this.player.sidekick.bullets[e2].index--;
 		}
 		
 		this.player.sidekick.bullets.pop();
-		
-		if(this.player.sidekick.bullets.length != 0) {
-			for(var e2 = index; e2 < this.player.sidekick.bullets.length; e2++) {
-				this.player.sidekick.bullets[e2].index--;
-			}
-		}
 	}
 	
 	removeEnemy(index) {
 		for(var e2 = index; e2 < this.enemies.length-1; e2++) {
 			this.enemies[e2] = this.enemies[e2+1];
+			this.enemies[e2].index--;
 		}
 		
 		this.enemies.pop();
-		
-		if(this.enemies.length != 0) {
-			for(var e2 = index; e2 < this.enemies.length; e2++) {
-				this.enemies[e2].index--;
-			}
-		}
 	}
 	
 	incrementGame() {
 		this.tick++;
+		var rateOffset = (this.speed+3)/4;
 		
-		if(this.tick%10000 == 0) {
-			this.enemySpeedOffset++;
-			if(this.enemySpeedOffset > 10) {
-				this.enemySpeedOffset = 10;
-			}
-			this.speed--;
-			if(this.speed < 1) {
-				this.speed = 1;
-			}
-			this.enemiesRate--;
-			if(this.enemiesRate < 2) {
-				this.enemiesRate = 2;
-			}
-			this.pointsRate++;
-			if(this.pointsRate > 20) {
-				this.pointsRate = 20;
-			}
-			this.player.sidekick.cooldown-=0.2;
-			if(this.player.sidekick.cooldown < 0.2) {
-				this.player.sidekick.cooldown = 0.2;
-			}
+		if(this.tick%4000 == 0) {
+			this.speed = Math.min(this.speed+=1, 4);
+			
+			this.enemiesRate = Math.max(this.enemiesRate-=1, 2);
+			
+			this.pointsRate = Math.min(this.pointsRate+=1, 20);
+			
+			this.player.sidekick.cooldown = Math.max(this.player.sidekick.cooldown-0.2, 0.2);
 		}
 		
-		if(this.tick%500 == 0) {
+		if(this.tick%Math.round(500/rateOffset) == 0) {
 			if(Math.floor(Math.random()*10) <= 3) {
 				this.generatePlatform();
 			}
 		}
 		
-		if(this.tick%100 == 0) {
+		if(this.tick%Math.round(100/rateOffset) == 0) {
 			if(Math.floor(Math.random()*this.enemiesRate)==1) {
 				this.generateEnemy();
-				
 			}
-			if(Math.floor(Math.random()*this.pointsRate) == 10) {
+			if(Math.floor(Math.random()*this.pointsRate) == 1) {
 				this.generatePoint();
 			}
 		}
@@ -718,6 +706,7 @@ class Game {
 			}
 		}
 		
+		this.ground.incrementAmount = 1+this.speed;
 		this.ground.increment();
 		this.player.processY(this.platforms, this.screenCanvas.width);
 		this.player.sidekick.increment();
@@ -744,7 +733,7 @@ class Game {
 			c.textAlign = "center";
 			c.fillText("Press Space To Start", this.screenCanvas.width*0.5-50, this.screenCanvas.height-20);
 		}
-		this.tick++;
+		this.tick = (this.tick+=1)%200;
 	}
 	
 	drawGameOver() {
@@ -766,7 +755,12 @@ class Game {
 		
 		//draw player
 		if(this.player.visible) {
-			c.drawImage(this.player.image, this.player.screenXOffset, this.screenCanvas.height-this.groundOffset-this.player.height-this.player.yOffset-this.player.sinOffset, this.player.width, this.player.height);
+			c.save();
+			c.translate((this.player.screenXOffset+(this.player.width/2)), ((this.screenCanvas.height-this.groundOffset-this.player.height-this.player.yOffset-this.player.sinOffset)+(this.player.height/2)));
+			c.rotate(-this.player.rotation*(Math.PI/180));
+			c.drawImage(this.player.image, -this.player.width/2, -this.player.height/2, this.player.width, this.player.height);
+			// c.drawImage(this.player.image, this.player.screenXOffset, this.screenCanvas.height-this.groundOffset-this.player.height-this.player.yOffset-this.player.sinOffset, this.player.width, this.player.height);
+			c.restore();
 		}
 		
 		//draw bullets
