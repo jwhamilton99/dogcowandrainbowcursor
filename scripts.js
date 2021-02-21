@@ -25,7 +25,7 @@ var muteImage;
 var soundImage;
 var musicImage;
 
-var masterOffset = 500;
+var masterOffset = 350;
 
 var musicPlaying = true;
 var soundsPlaying = true;
@@ -302,6 +302,8 @@ class Player {
 			},1000);
 		} else {
 			if(soundsPlaying) {
+				hurtSound.pause();
+				hurtSound.currentTime = 0;
 				hurtSound.play();
 			}
 			this.flashHurt(8);
@@ -540,32 +542,32 @@ class Game {
 	}
 	
 	generatePlatform() {
-		var length = Math.floor(Math.random()*20)+5
-		var newPlatform = new Platform(length, 1, this.platforms.length)
+		var length = Math.floor(Math.random()*20)+5;
+		var newPlatform = new Platform(length, 1, this.platforms.length);
 		newPlatform.xOffset = -(Math.floor(Math.random()*masterOffset));
 		newPlatform.incrementAmount+=this.speed;
 		this.platforms.push(newPlatform);
 		
 		var highPoint = new Point(this.points.length);
 		highPoint.yOffset = 125;
-		highPoint.xOffset = -(Math.floor(Math.random()*(newPlatform.numPanels*newPlatform.panelWidth)))+newPlatform.xOffset;
+		highPoint.xOffset = newPlatform.xOffset-(Math.floor(Math.random()*((newPlatform.numPanels*newPlatform.panelWidth)-highPoint.dim)));
 		highPoint.incrementAmount+=this.speed;
 		this.points.push(highPoint);
 		
 		if(length > 10) {
 			if(Math.floor(Math.random()*3) == 1) {
 				var hPlatform = new Platform(Math.floor(Math.random()*(length*0.75)+(Math.floor(length*0.25))),2,this.platforms.length);
-				hPlatform.xOffset = -(Math.floor(Math.random()*5)+2)*hPlatform.panelWidth;
+				hPlatform.xOffset = newPlatform.xOffset-(Math.floor(Math.random()*5)+2)*hPlatform.panelWidth;
 				hPlatform.incrementAmount+=this.speed;
 				this.platforms.push(hPlatform);
 				
-				if(Math.floor(Math.random()*5)<=2) {
+				// if(Math.floor(Math.random()*5)<=2) {
 					var higherPoint = new Point(this.points.length);
 					higherPoint.yOffset = 125*2;
-					higherPoint.xOffset = -(hPlatform.xOffset+(hPlatform.numPanels*hPlatform.panelWidth))/2;
+					higherPoint.xOffset = hPlatform.xOffset-(((hPlatform.numPanels*hPlatform.panelWidth)-higherPoint.dim)/2);
 					higherPoint.incrementAmount+=this.speed;
 					this.points.push(higherPoint);
-				}
+				// }
 			}
 		}
 	}
@@ -603,6 +605,8 @@ class Game {
 				this.removePoint(point.index);
 				player.increaseScore(10);
 				if(soundsPlaying) {
+					pointSound.pause();
+					pointSound.currentTime = 0;
 					pointSound.play();
 				}
 				return true;
@@ -619,6 +623,8 @@ class Game {
 					this.removeBullet(bullets[b].index);
 					this.player.increaseScore(5);
 					if(soundsPlaying) {
+						hitSound.pause();
+						hitSound.currentTime = 0;
 						hitSound.play();
 					}
 					return true;
