@@ -956,6 +956,11 @@ function handleResize() {
 	}
 }
 
+window.oncontextmenu = function(e) {
+	e.preventDefault();
+	e.stopPropagation();
+}
+
 function switchToHiResMode() {
 	if(hiRes) { return }
 	if(gameState == 0) {
