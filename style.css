@@ -89,7 +89,6 @@ body {
 	height:100%;
 	display:block;
 	flex-direction:row;
-	border:1px solid red;
 }
 
 .mobileControlIcon {
