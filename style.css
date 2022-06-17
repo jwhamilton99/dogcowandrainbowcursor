@@ -1,3 +1,9 @@
+body {
+	font-family: sans-serif;
+	overflow:hidden;
+	user-select:none;
+}
+
 .background-panel {
 	display:inline;
 }
@@ -34,4 +40,98 @@
 #screenCanvas {
 	position:absolute;
 	z-index:100;
+}
+
+#mobileContainer {
+	background-color:black;
+	position:absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	
+	display:none;
+	flex-direction:column;
+	align-items:center;
+	justify-content:center;
+}
+
+#mobileTop {
+	width:100%;
+	
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+#mobileContent {
+	width:100%;
+	flex-grow:1;
+}
+
+#mobileDock {
+	height:25vw;
+	width:100%;
+	background-image:url("images/background/mobiledock.png");
+	background-size:contain;
+	display:flex;
+	flex-direction:row;
+	justify-content:center;
+	max-height:200px;
+}
+
+#mobileTag {
+	font-size:5vw;
+	color:white;
+}
+
+#mobileControlsContainer {
+	height:100%;
+	display:flex;
+	flex-direction:row;
+}
+
+.mobileControlIcon {
+	height:65%;
+	margin-top:2.5vw;
+	filter: drop-shadow(0px 0px 10px rgba(0,0,0,0.55)) brightness(1);
+	user-drag: none;
+	-webkit-user-drag: none;
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	cursor:pointer;
+}
+
+.mobileControlIcon:active {
+	filter: drop-shadow(0px 0px 10px rgba(0,0,0,0.55)) brightness(.5);
+}
+
+#mobileShootIcon {
+	display:none;
+}
+
+#mobileMusicIcon {
+	margin-left:5vw;
+	display:none;
+}
+
+#loadingBlock {
+	position:absolute;
+	left:0;
+	right:0;
+	top:0;
+	bottom:0;
+	background-color:darkgrey;
+	z-index:100;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+}
+
+#loadingImage {
+	width:100%;
+	padding:5%;
+	max-width:500px;
 }

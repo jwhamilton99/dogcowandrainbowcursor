@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta name="viewport" content="width=device-width, user-scalable=no">
 		<meta charset="UTF-8">
 		<title>The Adventures of Dogcow and Spinning Rainbow Cursor in Finderland: The Game</title>
 		<link rel="stylesheet" type="text/css" href="style.css" />
@@ -7,6 +8,9 @@
 		<script src="scripts.js" type="text/javascript"></script>
 	</head>
 	<body>
+		<div id="loadingBlock">
+			<img id="loadingImage" src="/images/loading.png">
+		</div>
 		<div id="container">
 			<div id="background">
 				<img class="background-panel" id="top" src="images/background/top.png" />
@@ -14,10 +18,25 @@
 					<img class="background-panel" id="side" src="images/background/side.png" />
 					<div id="screenContainer">
 						<img class="background-panel" id="screen" src="images/background/screen.png" />
-						<canvas id="screenCanvas"></canvas>
+						<canvas id="screenCanvas" onclick="switchToHiResMode()"></canvas>
 					</div>
 				</div>
 				<img class="background-panel" id="bottom" src="images/background/bottom.png" />
+			</div>
+		</div>
+		<div id="mobileContainer">
+			<div id="mobileTop">
+				<p id="mobileTag">Made by <a href="https://www.jwhamilton.co">Justin Hamilton</a></p>
+			</div>
+			<div id="mobileContent">
+				<canvas id="mobileScreenCanvas" onclick="switchToHiResMode()"></canvas>
+			</div>
+			<div id="mobileDock">
+				<div id="mobileControlsContainer">
+					<img class="mobileControlIcon" id="mobileJumpIcon" src="images/background/ok.png" onmousedown="game.handleKeySpace(false)" ontouchstart="game.handleKeySpace(true)">
+					<img class="mobileControlIcon" id="mobileShootIcon" src="images/background/shoot.png" onmousedown="game.handleKeyReturn(false)" ontouchstart="game.handleKeyReturn(true)">
+					<img class="mobileControlIcon" id="mobileMusicIcon" src="images/background/music.png" onmousedown="game.handleKeyM(false)" ontouchstart="game.handleKeyM(true)">
+				</div>
 			</div>
 		</div>
 	</body>

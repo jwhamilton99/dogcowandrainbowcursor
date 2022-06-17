@@ -27,6 +27,8 @@ var musicImage;
 
 var masterOffset = 350;
 
+var scale = 1;
+
 var musicPlaying = true;
 var soundsPlaying = true;
 var soundMode = 0;
@@ -37,63 +39,74 @@ var waitToRestart = false;
 
 var game;
 
-function initGame() {
+var mobile = false;
+var hiRes = false;
+
+function loadImageWithPromise(path) {
+	return new Promise( (resolve)=> {
+		let image = new Image();
+		image.onload = ()=> {
+			resolve(image);
+		}
+		image.src = path;
+	})
+}
+
+async function initGame() {
+	var mobileFlag = "";
+	var hiResFlag = "";
+	if(mobile) {
+		mobileFlag = "Mobile";
+	}
+	
+	if(hiRes) {
+		hiResFlag = "HiRes";
+	}
+	
 	//title
-	titleImage = new Image();
-	titleImage.src="images/title.png";
+	
+	titleImage = await loadImageWithPromise("images/title"+mobileFlag+hiResFlag+".png");
+	// titleImage.src="images/title"+mobileFlag+hiResFlag+".png";
 	
 	//game over
-	gameOverImage = new Image();
-	gameOverImage.src = "images/gameover.png";
+	gameOverImage = await loadImageWithPromise("images/gameover"+mobileFlag+hiResFlag+".png");
 	
 	//player
-	playerImage = new Image();
-	playerImage.src = "images/player.png";
+	playerImage = await loadImageWithPromise("images/player"+mobileFlag+hiResFlag+".png");
 	
 	//sidekick
-	for(var i = 0; i < 9; i++) {
-		sidekickFrames[i] = new Image();
-		sidekickFrames[i].src = "images/sidekickframes/frame"+(i+1)+".png";
+	for(var i = 0; i < ((hiRes) ? 19 : 9); i++) {
+		let frame = new Image();
+		frame.src = "images/sidekickframes/frame"+(i+1)+hiResFlag+".png";
+		sidekickFrames[i] = frame;
 	}
 	
 	//platform
-	platformStart = new Image();
-	platformStart.src = "images/platform/start.png";
+	platformStart = await loadImageWithPromise("images/platform/start.png");
 	
-	platformMiddle = new Image()
-	platformMiddle.src = "images/platform/middle.png";
+	platformMiddle = await loadImageWithPromise("images/platform/middle.png");
 	
-	platformEnd = new Image();
-	platformEnd.src = "images/platform/end.png";
+	platformEnd = await loadImageWithPromise("images/platform/end.png");
 	
 	//enemies
-	enemyImage = new Image();
-	enemyImage.src = "images/enemy.png";
-	fastEnemyImage = new Image();
+	enemyImage = await loadImageWithPromise("images/enemy"+hiResFlag+".png");
 	
 	//lives
-	livesImage = new Image();
-	livesImage.src = "images/lives.png";
+	livesImage = await loadImageWithPromise("images/lives.png");
 	
 	//point
-	pointImage = new Image();
-	pointImage.src = "images/point.png";
+	pointImage = await loadImageWithPromise("images/point"+hiResFlag+".png");
 
 	//bullet
-	bulletImage = new Image();
-	bulletImage.src = "images/bullet.png";
+	bulletImage = await loadImageWithPromise("images/bullet"+hiResFlag+".png");
 	
 	//tutorial
-	tutorialImage = new Image();
-	tutorialImage.src = "images/tutorial.png";
+	tutorialImage = await loadImageWithPromise("images/tutorial"+mobileFlag+hiResFlag+".png");
 	
 	//sound
-	muteImage = new Image();
-	muteImage.src = "images/soundicons/mute.png";
-	soundImage = new Image();
-	soundImage.src = "images/soundicons/sound.png";
-	musicImage = new Image();
-	musicImage.src = "images/soundicons/music.png";
+	muteImage = await loadImageWithPromise("images/soundicons/mute"+mobileFlag+".png");
+	soundImage = await loadImageWithPromise("images/soundicons/sound"+mobileFlag+".png");
+	musicImage = await loadImageWithPromise("images/soundicons/music"+mobileFlag+".png");
 	
 	//sounds
 	beginSound = new Audio("sounds/begin.mp3");
@@ -115,17 +128,22 @@ function start() {
 }
 
 function resizeCanvas() {
-	var screenContainer = document.getElementById("screen");
-	var screenCanvas = document.getElementById("screenCanvas");
+	var screenContainer = document.getElementById((mobile) ? "mobileContent" : "screen");
+	var screenCanvas = document.getElementById((mobile) ? "mobileScreenCanvas" : "screenCanvas");
 	
-	screenCanvas.width = screenContainer.width-40;
-	screenCanvas.height = screenContainer.height;
+	if(mobile) {
+		screenCanvas.width = screenContainer.clientWidth;
+		screenCanvas.height = document.getElementById("mobileContainer").clientHeight-document.getElementById("mobileTop").clientHeight-document.getElementById("mobileDock").clientHeight;
+	} else {
+		screenCanvas.width = screenContainer.width-40;
+		screenCanvas.height = screenContainer.height;
+	}
 }
 
 class Ground {
 	constructor(width) {
 		this.isLoading = true
-		this.panelWidth = 20;
+		this.panelWidth = 20*scale;
 		this.numPanels = Math.ceil(width/this.panelWidth)+1;
 		this.offset = 0;
 		this.image = platformMiddle;
@@ -134,32 +152,32 @@ class Ground {
 	}
 	
 	increment() {
-		this.offset = (this.offset+=this.incrementAmount)%this.panelWidth;
+		this.offset = ((this.offset+=Math.floor(this.incrementAmount*scale))%this.panelWidth);
 	}
 }
 
 class Bullet {
 	constructor(startX, startY, index) {
-		this.dim = 30;
-		this.xOffset = startX-(this.dim);
-		this.yOffset = startY+(this.dim*2);
+		this.dim = 30*scale;
+		this.xOffset = (startX-(this.dim));
+		this.yOffset = (startY+(this.dim*2));
 		this.image = bulletImage;
 		this.index = index;
 	}
 	
 	increment() {
-		this.xOffset+=7;
-		this.yOffset-=1.5;
+		this.xOffset+=7*scale;
+		this.yOffset-=1.5*scale;
 	}
 }
 
 class Sidekick {
 	constructor(baseX, baseY) {
-		this.baseX = baseX;
-		this.baseY = baseY;
-		this.dim = 25;
-		this.xOffset = 20;
-		this.yOffset = 40;
+		this.baseX = baseX*scale;
+		this.baseY = baseY*scale;
+		this.dim = 25*scale;
+		this.xOffset = 20*scale;
+		this.yOffset = 40*scale;
 		this.sinOffset = 0;
 		this.cycleIndex = 0;
 		this.cycleLength = 0.05;
@@ -173,16 +191,16 @@ class Sidekick {
 	increment() {
 		if(this.cycleIndex%3 == 0) {
 			if(!this.coolingDown) {
-				this.frameIndex = ((this.frameIndex+=1)%9);
-			}
+				this.frameIndex = ((this.frameIndex+1)%((hiRes) ? 18 : 9));
+			} 
 		}
 		this.cycleIndex++;
 		
-		this.sinOffset = 10*Math.sin(this.cycleIndex*this.cycleLength);
+		this.sinOffset = (10*Math.sin(this.cycleIndex*this.cycleLength))*scale;
 	}
 	
 	currentFrame() {
-		return this.frames[this.frameIndex];
+		return sidekickFrames[this.frameIndex];
 	}
 	
 	shoot(jumpOffset) {
@@ -204,13 +222,13 @@ class Player {
 		this.cycleIndex = 0;
 		this.cycleLength = 0.1;
 		this.score = 0;
-		this.gravity = 0.4;
+		this.gravity = 0.4*scale;
 		this.health = 4;
-		this.screenXOffset = 100;
+		this.screenXOffset = 50;
 		this.yOffset = 0;
 		this.yForce = 0;
 		this.image = playerImage;
-		this.width = 75;
+		this.width = 75*scale;
 		this.height = this.width*0.78;
 		this.currentGroundLevel = 0;
 		this.visible = true
@@ -221,7 +239,7 @@ class Player {
 	}
 	
 	jump() {
-		var jumpForce = 12;
+		var jumpForce = 12*scale;
 		if(this.yOffset <= this.currentGroundLevel) {
 			this.yForce = jumpForce;
 			this.rotation = this.rotationLimit;
@@ -262,12 +280,9 @@ class Player {
 	
 	increment() {
 		if(this.yForce == 0) {
-			if(this.cycleIndex%3 == 0) {
-				this.frameIndex = ((this.frameIndex+=1)%9);
-			}
 			this.cycleIndex++;
 			
-			this.sinOffset = Math.abs(5*Math.sin(this.cycleIndex*this.cycleLength));
+			this.sinOffset = Math.abs(5*Math.sin(this.cycleIndex*this.cycleLength))*scale;
 		} else {
 			this.cycleIndex = 0;
 			this.sinOffset = 0;
@@ -281,7 +296,9 @@ class Player {
 				if(this.health > 5) {
 					this.health = 5;
 				} else {
-					livesIncreaseSound.play();
+					if(soundsPlaying) {
+						livesIncreaseSound.play();
+					}
 				}
 				break;
 			}
@@ -292,6 +309,10 @@ class Player {
 	decreaseHealth() {
 		this.health--;
 		if(this.health == 0) {
+			document.getElementById("mobileShootIcon").style.display = "none";
+			document.getElementById("mobileMusicIcon").style.display = "none";
+			document.getElementById("mobileJumpIcon").style.marginRight = "0";
+			document.getElementById("mobileJumpIcon").src = "images/background/ok.png";
 			waitToRestart = true;
 			if(soundsPlaying) {
 				musicLoopSound.pause();
@@ -324,18 +345,18 @@ class Platform {
 	constructor(numPanels, level, index) {
 		this.numPanels = numPanels;
 		this.xOffset = 0;
-		this.yOffset = 125*level;
+		this.yOffset = 125*level*scale;
 		this.startImage = platformStart;
 		this.middleImage = platformMiddle;
 		this.endImage = platformEnd;
-		this.panelWidth = 20;
+		this.panelWidth = 20*scale;
 		this.index = index;
 		this.incrementAmount = 1;
 		this.baseIncrementAmount = 1;
 	}
 	
 	iterate() {
-		this.xOffset+=this.incrementAmount;
+		this.xOffset+=this.incrementAmount*scale;
 	}
 }
 
@@ -344,14 +365,14 @@ class Point {
 		this.yOffset = 0;
 		this.xOffset = 0;
 		this.image = pointImage;
-		this.dim = 50;
+		this.dim = 50*scale;
 		this.index = index;
 		this.incrementAmount = 1;
 		this.baseIncrementAmount = 1;
 	}
 	
 	increment() {
-		this.xOffset+=this.incrementAmount;
+		this.xOffset+=this.incrementAmount*scale;
 	}
 }
 
@@ -360,33 +381,30 @@ class Enemy {
 		this.sinOffset = 0;
 		this.cycleIndex = 0;
 		this.cycleLength = 0.05;
-		this.yOffset = 125*level;
+		this.yOffset = 125*level*scale;
 		this.xOffset = 0;
 		this.image = enemyImage;
-		this.dim = 50;
+		this.dim = 50*scale;
 		this.index = index;
 		this.baseSpeed = 4;
 		this.speed = 4;
 	}
 	
 	increment() {
-		this.xOffset+=this.speed;
-		if(this.cycleIndex%3 == 0) {
-			this.frameIndex = ((this.frameIndex+=1)%9);
-		}
+		this.xOffset+=this.speed*scale;
 		this.cycleIndex++;
 		
-		this.sinOffset = 10*Math.sin(this.cycleIndex*this.cycleLength);
+		this.sinOffset = (10*Math.sin(this.cycleIndex*this.cycleLength))*scale;
 	}
 }
 
 class Game {
 	constructor() {
-		this.screenCanvas = document.getElementById("screenCanvas");
+		this.screenCanvas = document.getElementById((mobile) ? "mobileScreenCanvas" : "screenCanvas");
 		this.ground = new Ground(this.screenCanvas.width);
 		this.player = new Player();
 		this.tick = 0;
-		this.groundOffset = this.ground.panelWidth-6;
+		this.groundOffset = this.ground.panelWidth-((mobile) ? 10 : 6);
 		this.enemies = [];
 		this.platforms = [];
 		this.points = [];
@@ -398,55 +416,76 @@ class Game {
 		
 		document.addEventListener('keydown', (e)=> {
 			if(e.code == "Space") {
-				switch(gameState) {
-					case 0:
-						this.tick = 0;
-						gameState = 3;
-						break;
-					case 2:
-						if(!waitToRestart) {
-							this.resetGame();
-						}
-						break;
-					case 3:
-						this.resetGame();
-						break;
-					default:
-						this.player.jump();
-						break;
-				}
+				this.handleKeySpace(true);
 			} else if(e.code == "Enter") {
-				if(gameState == 1) {
-					this.player.sidekick.shoot(this.player.yOffset);
-				}
+				this.handleKeyReturn(true);
 			} else if(e.code == "KeyM") {
-				soundMode = (soundMode+=1)%3;
-				switch(soundMode) {
-					case 0:
-						soundsPlaying = true;
-						musicPlaying = true;
-						musicLoopSound.currentTime = 0.0;
-						musicLoopSound.play();
-						break;
-					case 1:
-						soundsPlaying = true;
-						musicPlaying = false;
-						musicLoopSound.pause()
-						break;
-					default:
-						soundsPlaying = false;
-						musicPlaying = false;
-						musicLoopSound.pause()
-						break;
-				}
+				this.handleKeyM(true);
 			}
 		});
 		
 		this.refresh();
 	}
 	
+	handleKeySpace(isTouch) {
+		if(mobile && !isTouch) { return }
+		switch(gameState) {
+			case 0:
+				this.tick = 0;
+				gameState = 3;
+				break;
+			case 2:
+				if(!waitToRestart) {
+					this.resetGame();
+				}
+				break;
+			case 3:
+				this.resetGame();
+				break;
+			default:
+				this.player.jump();
+				break;
+		}
+	}
+	
+	handleKeyReturn(isTouch) {
+		if(mobile && !isTouch) { return }
+		if(gameState == 1) {
+			this.player.sidekick.shoot(this.player.yOffset);
+		}
+	}
+	
+	handleKeyM(isTouch) {
+		if(mobile && !isTouch) { return }
+		soundMode = (soundMode+=1)%3;
+		switch(soundMode) {
+			case 0:
+				soundsPlaying = true;
+				musicPlaying = true;
+				musicLoopSound.currentTime = 0.0;
+				musicLoopSound.play();
+				break;
+			case 1:
+				soundsPlaying = true;
+				musicPlaying = false;
+				musicLoopSound.pause()
+				break;
+			default:
+				soundsPlaying = false;
+				musicPlaying = false;
+				musicLoopSound.pause()
+				break;
+		}
+	}
+	
 	resetGame() {
 		this.resetting = true;
+		
+		document.getElementById("mobileShootIcon").style.display = "block";
+		document.getElementById("mobileMusicIcon").style.display = "block";
+		document.getElementById("mobileJumpIcon").style.marginRight = "5vw";
+		document.getElementById("mobileJumpIcon").src = "images/background/jump.png";
+		
 		for(var i = 0; i <= this.enemies.length; i++) {
 			this.enemies.pop();
 		}
@@ -516,16 +555,22 @@ class Game {
 	}
 	
 	drawTutorial() {
-		var c = screenCanvas.getContext("2d");
-		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
+		var c = this.screenCanvas.getContext("2d");
+		c.clearRect(0,0,this.screenCanvas.width, this.screenCanvas.height);
 		
-		c.drawImage(tutorialImage, 0,0,this.screenCanvas.width, this.screenCanvas.height);
+		this.drawCenteredProportionalImage(tutorialImage, c);
 		
 		if(this.tick%200 < 100) {
-			c.font = "30px Arial";
+			c.font = ((mobile) ? "6vw" : "30px")+" Arial";
 			c.fillStyle = "red";
 			c.textAlign = "right";
-			c.fillText("Press Space To Continue", this.screenCanvas.width-20, this.screenCanvas.height-20);
+			
+			if(mobile) {
+				c.textAlign = "center";
+				c.fillText("Press ✔ To Continue", this.screenCanvas.width*0.5, this.screenCanvas.height-20);
+			} else {
+				c.fillText("Press Space To Continue", this.screenCanvas.width-20, this.screenCanvas.height-20);
+			}
 		}
 		this.tick++;
 	}
@@ -557,7 +602,7 @@ class Game {
 		this.platforms.push(newPlatform);
 		
 		var highPoint = new Point(this.points.length);
-		highPoint.yOffset = 125;
+		highPoint.yOffset = 125*scale;
 		highPoint.xOffset = newPlatform.xOffset-(Math.floor(Math.random()*((newPlatform.numPanels*newPlatform.panelWidth)-highPoint.dim)));
 		highPoint.incrementAmount+=this.speed;
 		this.points.push(highPoint);
@@ -571,7 +616,7 @@ class Game {
 				
 				if(Math.floor(Math.random()*5)<=2) {
 					var higherPoint = new Point(this.points.length);
-					higherPoint.yOffset = 125*2;
+					higherPoint.yOffset = 125*2*scale;
 					higherPoint.xOffset = hPlatform.xOffset-(((hPlatform.numPanels*hPlatform.panelWidth)-higherPoint.dim)/2);
 					higherPoint.incrementAmount+=this.speed;
 					this.points.push(higherPoint);
@@ -747,37 +792,60 @@ class Game {
 		this.player.increment();
 	}
 	
-	drawMenu() {
-		var c = screenCanvas.getContext("2d");
-		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
+	drawCenteredProportionalImage(image, context) {
+		var imageHeight = 0;
+		var imageWidth = 0;
+		var x = 0;
+		var y = 0;
 		
-		c.drawImage(titleImage, 0,0,this.screenCanvas.width, this.screenCanvas.height);
+		imageHeight = ((this.screenCanvas.width*image.height)/image.width);
+		imageWidth = (this.screenCanvas.width);
+		y = (this.screenCanvas.height/2)-(imageHeight/2);
+		
+		context.drawImage(image, x, y, imageWidth, imageHeight);
+	}
+	
+	drawMenu() {
+		var c = this.screenCanvas.getContext("2d");
+		c.clearRect(0,0,this.screenCanvas.width, this.screenCanvas.height);
+		
+		this.drawCenteredProportionalImage(titleImage, c);
 		
 		if(this.tick%200 < 100) {
-			c.font = "30px Arial";
+			c.font = ((mobile) ? "6vw" : "30px")+" Arial";
 			c.fillStyle = "red";
 			c.textAlign = "center";
-			c.fillText("Press Space To Start", this.screenCanvas.width*0.5-50, this.screenCanvas.height-20);
+			if(mobile) {
+				c.fillText("Press ✔ To Start", this.screenCanvas.width*0.5, this.screenCanvas.height-20);
+			} else {
+				c.fillText("Press Space To Start", this.screenCanvas.width*0.5-50, this.screenCanvas.height-20);
+			}
 		}
 		this.tick = (this.tick+=1)%200;
 	}
 	
 	drawGameOver() {
-		var c = screenCanvas.getContext("2d");
-		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
+		var c = this.screenCanvas.getContext("2d");
+		c.clearRect(0,0,this.screenCanvas.width, this.screenCanvas.height);
 		
-		c.drawImage(gameOverImage, 0,0,this.screenCanvas.width, this.screenCanvas.height);
+		this.drawCenteredProportionalImage(gameOverImage, c);
 		
-		c.font = "20px Arial";
-		c.fillStyle = "black";
-		c.textAlign = "right";
-		c.fillText("Your Score: "+this.player.score, this.screenCanvas.width-10, 30);
+		c.font = ((mobile) ? "6vw" : "30px")+" Arial";
+		if(mobile) {
+			c.fillStyle = "white";
+			c.textAlign = "center";
+			c.fillText("Your Score: "+this.player.score, this.screenCanvas.width/2, this.screenCanvas.height-20);
+		} else {
+			c.fillStyle = "black";
+			c.textAlign = "right";
+			c.fillText("Your Score: "+this.player.score, this.screenCanvas.width-10, 30);
+		}
 	}
 	
 	drawGame() {
-		var c = screenCanvas.getContext("2d");
-		c.clearRect(0,0,screenCanvas.width, screenCanvas.height);
-		c.fillStyle = "black";
+		var c = this.screenCanvas.getContext("2d");
+		c.clearRect(0,0,this.screenCanvas.width, this.screenCanvas.height);
+		c.fillStyle = (mobile) ? "white" : "black";
 		
 		//draw player
 		if(this.player.visible) {
@@ -824,20 +892,20 @@ class Game {
 		}
 		
 		//draw lives
-		var livesWidth = 30;
+		var livesWidth = 30*scale;
 		for(var l = 0; l <= this.player.health; l++) {
 			c.drawImage(livesImage, this.screenCanvas.width-livesWidth*l,2,livesWidth,livesWidth);
 		}
 		
 		//draw score
-		c.font = "20px Arial";
+		c.font = ((mobile) ? "6vw" : "20px")+" Arial";
 		c.textAlign = "right";
-		c.fillText("Score: "+this.player.score, this.screenCanvas.width-5, 55);
+		c.fillText("Score: "+this.player.score, this.screenCanvas.width-5, 55*scale+((mobile) ? 10 : 0));
 		
 		//draw sound mode
 		var x = 5;
 		var y = 5;
-		var dim = 25;
+		var dim = 25*scale;
 		switch(soundMode) {
 			case 0:
 				c.drawImage(musicImage, x, y, dim, dim);
@@ -855,25 +923,62 @@ class Game {
 var resizeLock = false;
 
 window.onresize = function() {
+	handleResize();
+}
+
+function handleResize() {
 	resizeCanvas();
-	if(window.innerWidth < 500) {
-		if(!resizeLock) {
-			window.alert("this game does not work on mobile or on small screens. please only use a desktop. sorry about that");
-			resizeLock = true;
+	if(!resizeLock) {
+		resizeLock = true;
+		if(window.innerWidth < window.innerHeight) {
+			if(!mobile) {
+				if(confirm("You're in portrait! The site needs to be refreshed to switch to the mobile layout.")) {
+					
+					window.location = window.location;
+				} else {
+					
+					window.location = window.location;
+				}
+			}
+		} else {
+			if(mobile) {
+				if(confirm("You're in portrait! The site needs to be refreshed to switch to the mobile layout.")) {
+					
+					window.location = window.location;
+				} else {
+					window.location = window.location;
+				}
+					
+			}
 		}
 	} else {
-		if(resizeLock) {
-			resizeLock = false;
+		resizeLock = false;
+	}
+}
+
+function switchToHiResMode() {
+	if(hiRes) { return }
+	if(gameState == 0) {
+		if(confirm("Switch to Ventura Mode?")) {
+			window.location = window.location+"?ventura"
 		}
 	}
 }
 
-window.onload = function() {
-	initGame();
-	resizeCanvas();
-	start();
-	if(window.innerWidth < 500) {
-		window.alert("this game does not work on mobile or on small screens. please only use a desktop. sorry about that");
-		resizeLock = true;
+window.onload = async function() {
+	if(window.location.href.includes("ventura")) {
+		hiRes = true;
 	}
+	
+	if(window.innerWidth < window.innerHeight) {
+		mobile = true;
+		scale = Math.min(Math.floor(window.innerWidth/275), 2);
+		document.getElementById("container").style.display = "none";
+		document.getElementById("mobileContainer").style.display = "flex";
+	}
+	
+	await initGame();
+	document.getElementById("loadingBlock").style.display = "none";
+	handleResize() 
+	start();
 }
