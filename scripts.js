@@ -313,6 +313,7 @@ class Player {
 			document.getElementById("mobileMusicIcon").style.display = "none";
 			document.getElementById("mobileJumpIcon").style.marginRight = "0";
 			document.getElementById("mobileJumpIcon").src = "images/background/ok.png";
+			document.getElementById("mobileControlsContainer").style.display = "block";
 			waitToRestart = true;
 			if(soundsPlaying) {
 				musicLoopSound.pause();
@@ -485,6 +486,7 @@ class Game {
 		document.getElementById("mobileMusicIcon").style.display = "block";
 		document.getElementById("mobileJumpIcon").style.marginRight = "5vw";
 		document.getElementById("mobileJumpIcon").src = "images/background/jump.png";
+		document.getElementById("mobileControlsContainer").style.display = "flex";
 		
 		for(var i = 0; i <= this.enemies.length; i++) {
 			this.enemies.pop();

@@ -87,8 +87,9 @@ body {
 
 #mobileControlsContainer {
 	height:100%;
-	display:flex;
+	display:block;
 	flex-direction:row;
+	border:1px solid red;
 }
 
 .mobileControlIcon {
