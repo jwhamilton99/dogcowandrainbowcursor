@@ -103,6 +103,9 @@ a {
 }
 
 @media screen and (orientation: portrait), screen and (max-width:750px) {
+	body {
+		font-size:4vw;
+	}
 	
 	#container {
 		align-items:flex-start;
