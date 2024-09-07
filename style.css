@@ -3,7 +3,7 @@ body {
 	font-family:sans-serif;
 }
 
-h1, h2, p {
+h2, p {
 	margin:0;
 }
 
@@ -73,6 +73,7 @@ h1 {
 	margin-top:var(--gap);
 	flex-wrap:wrap;
 	justify-content:center;
+	align-items:center;
 }
 
 .linkContainer {
@@ -80,12 +81,10 @@ h1 {
 	padding:var(--gap);
 	border:2px solid black;
 	border-radius:var(--gap);
-	
 	display:flex;
 	flex-direction:column;
 	gap:var(--gap);
 	color:black;
-	gap: var(--gap);
 }
 
 .linkContainer:hover {
@@ -115,12 +114,19 @@ a {
 		height:unset;
 	}
 	
-	#screenshotsContainer {
-		gap:calc(var(--gap) * 2);
+	#linksContainer {
+		height:unset;
+		display:block;
 	}
 	
-	.screenshot {
+	.linkContainer {
 		flex-direction:column;
+		height:unset;
+		margin-top:var(--gap);
+	}
+	
+	.linkContainer {
+		margin-top:var(--gap);
 	}
 	
 	.vertical {
@@ -129,11 +135,7 @@ a {
 	}
 	
 	img {
-		width:100%;
 		height:unset;
-	}
-	
-	#linksContainer {
-		flex-direction:column;
+		width:100%;
 	}
 }
