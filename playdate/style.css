@@ -1,0 +1,161 @@
+body {
+	--gap: 0.75em;
+	font-family:sans-serif;
+}
+
+h1, h2, p {
+	margin:0;
+}
+
+h1 {
+	margin-top:var(--gap);
+}
+
+#container {
+	position:absolute;
+	left: 0;
+	top:0;
+	right:0;
+	bottom:0;
+	
+	background:url('/playdate/images/background.png');
+	background-repeat:no-repeat;
+	background-size:cover;
+	
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	
+	padding:var(--gap);
+	
+	overflow-x:hidden;
+}
+
+#content {
+	width: 100%;
+	max-width: 750;
+	
+	/* background-color:white; */
+	
+	display:flex;
+	flex-direction:column;
+	align-items:stretch;
+	gap: var(--gap);
+	
+	text-align:center;
+	justify-content:center;
+	
+	user-select:none;
+	
+	
+	height:calc(100% - calc(var(--gap) * 2));
+	max-height:750;
+}
+
+#block {
+	
+	
+	display:flex;
+	flex-direction:column;
+	align-items:stretch;
+	gap: var(--gap);
+	
+	background-color:white;
+	border:2px solid black;
+	border-radius:var(--gap);
+	overflow-x:hidden;
+	padding:var(--gap);
+	gap: var(--gap);
+}
+
+img {
+	height:200px;
+	border:2px solid black;
+	border-radius:var(--gap);
+	box-sizing:border-box;
+	flex-grow:2;
+}
+
+.screenshot {
+	display:flex;
+	flex-direction:row;
+	
+	gap: var(--gap);
+}
+
+#screenshotsContainer {
+	display:flex;
+	flex-direction:row;
+	gap:var(--gap);
+	margin-top:var(--gap);
+	flex-wrap:wrap;
+	justify-content:center;
+}
+
+.vertical {
+	display:flex;
+	flex-direction:column;
+	align-items:flex-start;
+	justify-content:center;
+	
+	text-align:left;
+	gap: var(--gap);
+}
+
+#downloadButton, #backButton {
+	padding:var(--gap);
+	border:2px solid black;
+	border-radius:var(--gap);
+	text-decoration:none;
+}
+
+#downloadButton {
+	background-color:rgba(50,100,150,1);
+	color:white;
+}
+
+#backButton {
+	background-color:lightgrey;
+	color:black;
+}
+
+#backButton:hover, #downloadButton:hover {
+	background-color:black;
+	color:white;
+	cursor:pointer;
+}
+
+a {
+	color:rgba(50,100,200,1);
+}
+
+@media screen and (max-width: 750px) {
+	
+	#container {
+		align-items:flex-start;
+	}
+	
+	#content {
+		max-width:unset;
+		max-height:unset;
+		height:unset;
+	}
+	
+	#screenshotsContainer {
+		gap:calc(var(--gap) * 2);
+	}
+	
+	.screenshot {
+		flex-direction:column;
+	}
+	
+	.vertical {
+		align-items:center;
+		text-align:center;
+	}
+	
+	img {
+		width:100%;
+		height:unset;
+	}
+}
