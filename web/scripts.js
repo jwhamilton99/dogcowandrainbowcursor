@@ -42,7 +42,7 @@ var game;
 var mobile = false;
 var hiRes = false;
 
-var baseUrl = "web/";
+var baseUrl = "";
 
 function loadImageWithPromise(path) {
 	return new Promise( (resolve)=> {
