@@ -105,6 +105,7 @@ a {
 @media screen and (orientation: portrait), screen and (max-width:750px) {
 	body {
 		font-size:4vw;
+		--gap: 2vw;
 	}
 	
 	#container {
@@ -126,10 +127,7 @@ a {
 		flex-direction:column;
 		height:unset;
 		margin-top:var(--gap);
-	}
-	
-	.linkContainer {
-		margin-top:var(--gap);
+		border:0.5vw solid black;
 	}
 	
 	.vertical {
@@ -140,5 +138,6 @@ a {
 	img {
 		height:unset;
 		width:100%;
+		border:0.5vw solid black;
 	}
 }

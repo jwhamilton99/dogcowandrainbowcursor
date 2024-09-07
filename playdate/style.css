@@ -132,6 +132,7 @@ a {
 @media screen and (orientation: portrait), screen and (max-width:750px) {
 	body {
 		font-size:4vw;
+		--gap: 2vw;
 	}
 	
 	#container {
@@ -145,7 +146,8 @@ a {
 	}
 	
 	#screenshotsContainer {
-		gap:calc(var(--gap) * 2);
+		/* gap:calc(var(--gap) * 2); */
+		display:block;
 	}
 	
 	.screenshot {
@@ -160,5 +162,7 @@ a {
 	img {
 		width:100%;
 		height:unset;
+		margin-top:var(--gap);
+		border:0.5vw solid black;
 	}
 }
